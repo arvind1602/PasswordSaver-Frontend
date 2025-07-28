@@ -10,7 +10,7 @@ export default function Header() {
   const isLoggedIn = false; // ← change to false to test logged-out state
 
   const staticLinks = [
-    { label: "Home", to: "/" },
+    { label: "Home", to: "/home" },
     { label: "Security", to: "/security" },
     { label: "About", to: "/about" },
   ];

@@ -3,7 +3,7 @@ import { FaLock, FaRocket, FaShieldAlt, FaUserShield, FaThumbsUp } from "react-i
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white px-4 py-10 pt-25">
       <div className="max-w-6xl mx-auto text-center">
         {/* 🌟 Hero Section */}
         <h1 className="text-4xl md:text-6xl font-extrabold bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-transparent bg-clip-text mb-6">
