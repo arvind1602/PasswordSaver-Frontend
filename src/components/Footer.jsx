@@ -31,7 +31,7 @@ export default function Footer() {
               <FaGithub size={28} />
             </a>
             <a
-              href="https://instagram.com/"
+              href="https://www.instagram.com/aayush.2k05/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-pink-400 hover:text-white transform hover:scale-125 transition duration-300"
@@ -40,7 +40,7 @@ export default function Footer() {
               <FaInstagram size={28} />
             </a>
             <a
-              href="https://linkedin.com/"
+              href="http://www.linkedin.com/in/arvind-nagpure"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 hover:text-white transform hover:scale-125 transition duration-300"

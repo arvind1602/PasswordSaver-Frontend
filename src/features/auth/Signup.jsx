@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -10,6 +12,10 @@ export default function Signup() {
     password: "",
   });
 
+  const navigate = useNavigate();
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
+
   const handleChange = (e) => {
     setForm((prev) => ({
       ...prev,
@@ -17,63 +23,95 @@ export default function Signup() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // 🔐 Send data to backend or validate here
-    console.log("Signup Data ➜", form);
+    try {
+      const response = await axios.post("/api/users/create", form);
+      console.log(response.data);
+
+      setSuccessMsg("🎉 User created successfully!");
+      setErrorMsg(null);
+      setForm({
+        fullname: "",
+        username: "",
+        email: "",
+        password: "",
+      });
+    } catch (error) {
+      if (error.response) {
+        setErrorMsg(error.response.data.message || "❌ Signup failed");
+        setSuccessMsg(null);
+      } else {
+        setErrorMsg("Something went wrong");
+        setSuccessMsg(null);
+      }
+    }
   };
+
+  // Auto-clear messages after 4 seconds
+  useEffect(() => {
+    if (errorMsg || successMsg) {
+      if (successMsg) {
+        setTimeout(() => {
+          navigate("/signin");
+        }, 2000);
+      }
+      const timer = setTimeout(() => {
+        setErrorMsg(null);
+        setSuccessMsg(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMsg, successMsg]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] px-4">
-      <div className="bg-white/5 backdrop-blur-md border border-gray-700 shadow-2xl rounded-2xl p-8 w-full max-w-md text-gray-100">
+      <div className="bg-white/5 backdrop-blur-md border border-gray-700 shadow-2xl rounded-2xl p-8 w-full max-w-md text-gray-100 relative">
+        {/* 💬 Alerts */}
+        {errorMsg && (
+          <div className="absolute top-[-70px] left-0 w-full">
+            <div className="bg-red-600/20 border border-red-400 text-red-300 p-3 rounded-md text-center text-sm animate-pulse shadow">
+              ❌ {errorMsg}
+            </div>
+          </div>
+        )}
+        {successMsg && (
+          <div className="absolute top-[-70px] left-0 w-full">
+            <div className="bg-green-600/20 border border-green-400 text-green-300 p-3 rounded-md text-center text-sm animate-fadeIn shadow">
+              ✅ {successMsg}
+            </div>
+          </div>
+        )}
+
         <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-cyan-400 to-fuchsia-500 bg-clip-text text-transparent">
           Create Account
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Full Name */}
-          <div>
-            <label className="block mb-1 text-sm">Full Name</label>
-            <input
-              type="text"
-              name="fullname"
-              value={form.fullname}
-              onChange={handleChange}
-              required
-              placeholder="Full name"
-              className="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none"
-            />
-          </div>
+          <InputField
+            label="Full Name"
+            name="fullname"
+            value={form.fullname}
+            onChange={handleChange}
+            placeholder="Full name"
+          />
+          <InputField
+            label="Username"
+            name="username"
+            value={form.username}
+            onChange={handleChange}
+            placeholder="Username"
+          />
+          <InputField
+            label="Email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="Email"
+            type="email"
+          />
 
-          {/* Username */}
-          <div>
-            <label className="block mb-1 text-sm">Username</label>
-            <input
-              type="text"
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              required
-              placeholder="Username"
-              className="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none"
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block mb-1 text-sm">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              placeholder="Email"
-              className="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none"
-            />
-          </div>
-
-          {/* Password */}
+          {/* Password Field */}
           <div>
             <label className="block mb-1 text-sm">Password</label>
             <div className="relative">
@@ -112,6 +150,31 @@ export default function Signup() {
           </a>
         </p>
       </div>
+    </div>
+  );
+}
+
+// 🔧 Reusable InputField Component
+function InputField({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+}) {
+  return (
+    <div>
+      <label className="block mb-1 text-sm">{label}</label>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        required
+        placeholder={placeholder}
+        className="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none"
+      />
     </div>
   );
 }

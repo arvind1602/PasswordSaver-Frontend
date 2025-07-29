@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const sidebarRef = useRef();
+  const navigate = useNavigate();
 
   // Simulate user login status (replace with real auth later)
-  const isLoggedIn = false; // ← change to false to test logged-out state
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // ← change to false to test logged-out state
 
   const staticLinks = [
     { label: "Home", to: "/home" },
@@ -26,6 +29,56 @@ export default function Header() {
     if (isOpen) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
+
+  //checking user status logging or logout
+
+  useEffect(() => {
+    const verifyUser = async () => {
+      console.log("hello");
+
+      try {
+        const res = await axios.post("/api/users/verify", null, {
+          withCredentials: true,
+        });
+
+        // ✅ Successful respons
+
+        if (res.data.message === "Success") {
+          setIsLoggedIn(true);
+        }
+      } catch (error) {
+        // ❌ Handle errors
+        if (error.response) {
+          console.error("❌ Verification failed:", error.response.data.message);
+        } else {
+          console.error("❌ Network error or unexpected error:", error.message);
+        }
+      }
+    };
+
+    verifyUser();
+  }, [isLoggedIn]);
+
+  //userlogout function
+
+  const logoutUser = async () => {
+    try {
+      const res = await axios.post("/api/users/logout", null, {
+        withCredentials: true,
+      });
+      console.log(res.data);
+      setIsLoggedIn(false)
+    } catch (error) {
+      if (error.response) {
+        console.error("logout action failed : ", error.response.data.message);
+      } else {
+        console.error(
+          "❌ Network error or unexpected error while user try to logout :",
+          error.message
+        );
+      }
+    }
+  };
 
   return (
     <>
@@ -93,10 +146,7 @@ export default function Header() {
                     Profile
                   </NavLink>
                   <button
-                    onClick={() => {
-                      alert("You are now logged out!");
-                      // clear auth state here
-                    }}
+                    onClick={logoutUser}
                     className="px-4 py-1.5 rounded-md text-white bg-red-500 hover:bg-red-600 transition text-sm"
                   >
                     Logout

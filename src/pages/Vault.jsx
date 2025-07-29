@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FaEye,
   FaEyeSlash,
@@ -9,33 +9,28 @@ import {
   FaPlus,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-
-const dummyPasswords = [
-  {
-    id: 1,
-    service: "Gmail",
-    username: "arvind1602",
-    password: "mySecretPass1",
-  },
-  {
-    id: 2,
-    service: "Facebook",
-    username: "arvind.fb",
-    password: "fbStrongPass!",
-  },
-  {
-    id: 3,
-    service: "Twitter",
-    username: "arvind_tw",
-    password: "twPassword@123",
-  },
-];
+import axios from "axios";
 
 export default function Vault() {
   const navigate = useNavigate();
   const [visibleIds, setVisibleIds] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
-  const [passwords, setPasswords] = useState(dummyPasswords);
+  const [passwords, setPasswords] = useState([]);
+  const [editData, setEditData] = useState(null); // password being edited
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null); // id to delete
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.get("/api/passwords/show/user-passwords");
+        setPasswords(res.data.data);
+      } catch (error) {
+        console.error("❌ Error fetching passwords:", error.message);
+      }
+    })();
+  }, []);
 
   const toggleVisibility = (id) => {
     setVisibleIds((prev) =>
@@ -49,19 +44,37 @@ export default function Vault() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const deletePassword = (id) => {
-    if (window.confirm("Are you sure you want to delete this password?")) {
-      setPasswords(passwords.filter((item) => item.id !== id));
+  const handleEdit = (entry) => {
+    setEditData(entry);
+    setShowEditModal(true);
+  };
+
+  const handleDelete = (id) => {
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await axios.delete(`/api/passwords/${deleteId}`);
+      setPasswords(passwords.filter((item) => item.id !== deleteId));
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error("❌ Error deleting password:", error.message);
     }
   };
 
-  const updatePassword = (id) => {
-    navigate("/vault/update-password")
-  };
-
-  const addPassword = () => {
-    // Navigate to a form or modal to add a new password
-    navigate("/vault/add-password");
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.put(`/api/passwords/${editData.id}`, editData);
+      setPasswords((prev) =>
+        prev.map((item) => (item.id === editData.id ? editData : item))
+      );
+      setShowEditModal(false);
+    } catch (error) {
+      console.error("❌ Error updating password:", error.message);
+    }
   };
 
   return (
@@ -72,77 +85,161 @@ export default function Vault() {
             Your Password Vault 🔐
           </h1>
           <button
-            onClick={addPassword}
+            onClick={() => navigate("/vault/add-password")}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white rounded-md hover:opacity-90 transition"
           >
             <FaPlus /> Add
           </button>
         </div>
 
-        <div className="space-y-6">
-          {passwords.map((entry) => (
-            <div
-              key={entry.id}
-              className="bg-white/5 backdrop-blur-lg border border-gray-700 rounded-xl p-6 shadow-md flex flex-col md:flex-row md:items-center md:justify-between gap-6"
-            >
-              <div>
-                <h2 className="text-xl font-semibold text-cyan-400">
-                  {entry.service}
-                </h2>
-                <p className="text-gray-300 text-sm">
-                  Username: {entry.username}
-                </p>
-                <p className="text-gray-300 text-sm">
-                  Password:{" "}
-                  {visibleIds.includes(entry.id) ? entry.password : "••••••••"}
-                </p>
+        {passwords.length === 0 ? (
+          <div className="text-center py-20 text-gray-400 text-lg">
+            You haven't saved any passwords yet. Click "Add" to get started!
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {passwords.map((entry) => (
+              <div
+                key={entry.id}
+                className="bg-white/5 backdrop-blur-lg border border-gray-700 rounded-xl p-6 shadow-md flex flex-col md:flex-row md:items-center md:justify-between gap-6"
+              >
+                <div>
+                  <h2 className="text-xl font-semibold text-cyan-400">
+                    {entry.serviceName}
+                  </h2>
+                  <p className="text-gray-300 text-sm">
+                    Username: {entry.username}
+                  </p>
+                  <p className="text-gray-300 text-sm">
+                    Password:{" "}
+                    {visibleIds.includes(entry.id)
+                      ? entry.password
+                      : "••••••••"}
+                  </p>
+                </div>
+
+                <div className="flex gap-4 text-lg">
+                  <button
+                    onClick={() => toggleVisibility(entry.id)}
+                    title="Show/Hide Password"
+                    className="hover:text-cyan-400 transition"
+                  >
+                    {visibleIds.includes(entry.id) ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                  <button
+                    onClick={() => copyToClipboard(entry.password, entry.id)}
+                    title="Copy Password"
+                    className="hover:text-green-400 transition"
+                  >
+                    {copiedId === entry.id ? (
+                      <FaCheckCircle className="text-green-400" />
+                    ) : (
+                      <FaCopy />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleEdit(entry)}
+                    title="Edit"
+                    className="hover:text-yellow-400 transition"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(entry.id)}
+                    title="Delete"
+                    className="hover:text-red-500 transition"
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
               </div>
-
-              <div className="flex gap-4 text-lg">
-                {/* Show/Hide */}
-                <button
-                  onClick={() => toggleVisibility(entry.id)}
-                  title="Show/Hide Password"
-                  className="hover:text-cyan-400 transition"
-                >
-                  {visibleIds.includes(entry.id) ? <FaEyeSlash /> : <FaEye />}
-                </button>
-
-                {/* Copy */}
-                <button
-                  onClick={() => copyToClipboard(entry.password, entry.id)}
-                  title="Copy Password"
-                  className="hover:text-green-400 transition"
-                >
-                  {copiedId === entry.id ? (
-                    <FaCheckCircle className="text-green-400" />
-                  ) : (
-                    <FaCopy />
-                  )}
-                </button>
-
-                {/* Update */}
-                <button
-                  onClick={() => updatePassword(entry.id)}
-                  title="Update"
-                  className="hover:text-yellow-400 transition"
-                >
-                  <FaEdit />
-                </button>
-
-                {/* Delete */}
-                <button
-                  onClick={() => deletePassword(entry.id)}
-                  title="Delete"
-                  className="hover:text-red-500 transition"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* 🔧 Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#1e1e2f] p-6 rounded-lg w-full max-w-md border border-cyan-500 shadow-2xl">
+            <h2 className="text-xl font-bold mb-4 text-cyan-400">
+              ✏️ Edit Password
+            </h2>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <input
+                type="text"
+                name="serviceName"
+                value={editData.serviceName}
+                onChange={(e) =>
+                  setEditData({ ...editData, serviceName: e.target.value })
+                }
+                className="w-full p-2 bg-gray-800 border border-gray-600 rounded"
+                placeholder="Service"
+              />
+              <input
+                type="text"
+                name="username"
+                value={editData.username}
+                onChange={(e) =>
+                  setEditData({ ...editData, username: e.target.value })
+                }
+                className="w-full p-2 bg-gray-800 border border-gray-600 rounded"
+                placeholder="Username"
+              />
+              <input
+                type="text"
+                name="password"
+                value={editData.password}
+                onChange={(e) =>
+                  setEditData({ ...editData, password: e.target.value })
+                }
+                className="w-full p-2 bg-gray-800 border border-gray-600 rounded"
+                placeholder="Password"
+              />
+              <div className="flex justify-between gap-4">
+                <button
+                  type="submit"
+                  className="flex-1 py-2 bg-gradient-to-r from-green-400 to-cyan-500 text-white rounded"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  type="button"
+                  className="flex-1 py-2 border border-gray-600 rounded text-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 🗑️ Delete Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-[#1e1e2f] p-6 rounded-lg w-full max-w-sm border border-red-500 text-center">
+            <h3 className="text-lg font-bold text-red-400 mb-4">
+              Are you sure you want to delete this password?
+            </h3>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 border border-gray-500 text-gray-300 rounded"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,10 +2,35 @@ import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import SplashScreen from "./SplashScreen";
+import axios from "axios";
 
 export default function SplashManager() {
   const [showSplash, setShowSplash] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.post("/api/users/refresh-token", null, {
+          withCredentials: true,
+        });
+        console.log("access token refres : " , res);
+        
+      } catch (error) {
+        if (error.response) {
+          console.error(
+            "refresh Access token failed : ",
+            error.response.data.message
+          );
+        } else {
+          console.error(
+            "❌ Network error or unexpected error while refresh access token:",
+            error.message
+          );
+        }
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     if (!showSplash) {
