@@ -1,27 +1,37 @@
-import { useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import SplashScreen from "./SplashScreen";
-import Header from "./Header";
-import Footer from "./Footer";
 
 export default function SplashManager() {
   const [showSplash, setShowSplash] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!showSplash) {
+      const timer = setTimeout(() => {
+        navigate("/home"); // Redirect to your home route
+      }, 800); // small delay for smooth fade
+      return () => clearTimeout(timer);
+    }
+  }, [showSplash, navigate]);
 
   return (
     <AnimatePresence mode="wait">
       {showSplash ? (
         <SplashScreen key="splash" onComplete={() => setShowSplash(false)} />
       ) : (
-        <div
+        <motion.div
           key="main"
-          className="min-h-screen flex flex-col bg-[#121212] text-white animate-fadeIn"
+          className="min-h-screen flex items-center justify-center bg-[#121212] text-white"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.6 }}
         >
-          <Header />
-          <main className="flex-grow flex items-center justify-center text-3xl">
-            Welcome to PasswordSaver!
-          </main>
-          <Footer />
-        </div>
+          {/* Optionally show "loading home..." or loader */}
+          <p className="text-xl font-medium text-gray-400">Loading Home...</p>
+        </motion.div>
       )}
     </AnimatePresence>
   );

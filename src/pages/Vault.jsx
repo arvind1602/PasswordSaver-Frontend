@@ -8,6 +8,7 @@ import {
   FaEdit,
   FaPlus,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const dummyPasswords = [
   {
@@ -31,6 +32,7 @@ const dummyPasswords = [
 ];
 
 export default function Vault() {
+  const navigate = useNavigate();
   const [visibleIds, setVisibleIds] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
   const [passwords, setPasswords] = useState(dummyPasswords);
@@ -54,11 +56,12 @@ export default function Vault() {
   };
 
   const updatePassword = (id) => {
-    alert(`Update form would open for item ID: ${id}`);
+    navigate("/vault/update-password")
   };
 
   const addPassword = () => {
-    alert("Add password modal would open here.");
+    // Navigate to a form or modal to add a new password
+    navigate("/vault/add-password");
   };
 
   return (

@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
 import { FaLock, FaRocket, FaShieldAlt, FaUserShield, FaThumbsUp } from "react-icons/fa";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 export default function Home() {
   return (
+    <>
+    <Header/>
     <div className="min-h-screen bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white px-4 py-10 pt-25">
       <div className="max-w-6xl mx-auto text-center">
         {/* 🌟 Hero Section */}
@@ -81,6 +85,8 @@ export default function Home() {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 }
 

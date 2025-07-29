@@ -29,15 +29,15 @@ export default function UpdatePassword() {
   });
 
   // Load entry based on ID (simulated from dummy)
-  useEffect(() => {
-    const selected = dummyPasswords.find((item) => item.id === Number(id));
-    if (selected) {
-      setFormData(selected);
-    } else {
-      alert("Password entry not found!");
-      navigate("/vault");
-    }
-  }, [id, navigate]);
+  // useEffect(() => {
+  //   const selected = dummyPasswords.find((item) => item.id === Number(id));
+  //   if (selected) {
+  //     setFormData(selected);
+  //   } else {
+  //     alert("Password entry not found!");
+  //     navigate("/vault");
+  //   }
+  // }, [id, navigate]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({

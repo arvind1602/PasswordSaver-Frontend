@@ -11,7 +11,6 @@ export default function Header() {
 
   const staticLinks = [
     { label: "Home", to: "/home" },
-    { label: "Security", to: "/security" },
     { label: "About", to: "/about" },
   ];
 
