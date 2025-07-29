@@ -14,7 +14,7 @@ export default function SplashManager() {
         const res = await axios.post("/api/users/refresh-token", null, {
           withCredentials: true,
         });
-        console.log("access token refres : " , res);
+        // console.log("access token refres : " , res);
         
       } catch (error) {
         if (error.response) {

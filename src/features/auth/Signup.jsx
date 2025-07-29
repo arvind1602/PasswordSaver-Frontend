@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import AlreadyLoggedInNotice from "./AlreadyLoggedInNotice";
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,6 +16,7 @@ export default function Signup() {
   const navigate = useNavigate();
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(null);
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -27,7 +29,6 @@ export default function Signup() {
     e.preventDefault();
     try {
       const response = await axios.post("/api/users/create", form);
-      console.log(response.data);
 
       setSuccessMsg("🎉 User created successfully!");
       setErrorMsg(null);
@@ -63,6 +64,29 @@ export default function Signup() {
       return () => clearTimeout(timer);
     }
   }, [errorMsg, successMsg]);
+
+  // null = checking, true/false = result
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.get("/api/user/profile", {
+          withCredentials: true,
+        });
+        setIsLoggedIn(true); // user is logged in
+      } catch {
+        setIsLoggedIn(false); // user is not logged in
+      }
+    })();
+  }, []);
+
+  if (isLoggedIn === null) {
+    return <div className="text-white p-10">Checking...</div>;
+  }
+
+  if (isLoggedIn) {
+    return <AlreadyLoggedInNotice />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] px-4">

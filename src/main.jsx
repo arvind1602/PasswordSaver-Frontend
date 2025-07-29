@@ -15,7 +15,7 @@ import About from "./pages/About.jsx";
 import SignIn from "./features/auth/SignIn.jsx";
 import Signup from "./features/auth/Signup.jsx";
 import Vault from "./pages/Vault.jsx";
-
+import UserProfile from "./pages/UserProfile.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -27,6 +27,7 @@ const router = createBrowserRouter(
       <Route path="signin" element={<SignIn />} />
       <Route path="signup" element={<Signup />} />
       <Route path="vault" element={<Vault />} />
+      <Route path="/profile" element={<UserProfile />} />
     </Route>
   )
 );

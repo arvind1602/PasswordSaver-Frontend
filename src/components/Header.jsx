@@ -34,8 +34,6 @@ export default function Header() {
 
   useEffect(() => {
     const verifyUser = async () => {
-      console.log("hello");
-
       try {
         const res = await axios.post("/api/users/verify", null, {
           withCredentials: true,
@@ -67,7 +65,7 @@ export default function Header() {
         withCredentials: true,
       });
       console.log(res.data);
-      setIsLoggedIn(false)
+      setIsLoggedIn(false);
     } catch (error) {
       if (error.response) {
         console.error("logout action failed : ", error.response.data.message);

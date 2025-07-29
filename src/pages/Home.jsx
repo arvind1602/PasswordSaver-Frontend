@@ -23,7 +23,6 @@ export default function Home() {
         });
 
         // ✅ Successful response
-        console.log("✅ Verified user:", res.data.message);
       } catch (error) {
         // ❌ Handle errors
         if (error.response) {
