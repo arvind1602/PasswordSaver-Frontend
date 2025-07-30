@@ -37,7 +37,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://passwordsaver-backend.onrender.com",
+        target: "https://passwordsaver-backend.onrender.com/",
       },
     },
   },
