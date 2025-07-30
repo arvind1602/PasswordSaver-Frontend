@@ -35,7 +35,7 @@ export default function Header() {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const res = await axios.post("https://passwordsaver-backend.onrender.com/api/users/verify", null, {
+        const res = await axios.post("/api/users/verify", null, {
           withCredentials: true,
         });
 
@@ -61,7 +61,7 @@ export default function Header() {
 
   const logoutUser = async () => {
     try {
-      const res = await axios.post("https://passwordsaver-backend.onrender.com/api/users/logout", null, {
+      const res = await axios.post("/api/users/logout", null, {
         withCredentials: true,
       });
       console.log(res.data);

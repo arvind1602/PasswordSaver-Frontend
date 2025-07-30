@@ -36,7 +36,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://passwordsaver-backend.onrender.com",
+        target: "http://localhost:8000",
         changeOrigin: true,
         secure: false, // Set to true if your backend uses a valid HTTPS cert
         rewrite: (path) => path.replace(/^\/api/, "/api"), // optional cleanup
