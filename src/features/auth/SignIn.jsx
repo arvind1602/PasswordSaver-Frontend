@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate , Link} from "react-router-dom";
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
@@ -155,9 +155,8 @@ export default function SignIn() {
 
           <p className="text-center text-sm text-gray-400 mt-6">
             Don’t have an account?{" "}
-            <a href="/signup" className="text-cyan-400 hover:underline">
-              Sign up here
-            </a>
+            <Link to="/signup" className="text-cyan-400 hover:underline">
+              Sign up here</Link>
           </p>
         </div>
       </div>

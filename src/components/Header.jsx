@@ -244,10 +244,7 @@ export default function Header() {
                     Profile
                   </NavLink>
                   <button
-                    onClick={() => {
-                      setIsOpen(false);
-                      alert("You are now logged out!");
-                    }}
+                    onClick={logoutUser}
                     className="w-full px-4 py-2 rounded-md text-white bg-red-500 hover:bg-red-600 transition text-sm"
                   >
                     Logout

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate , Link } from "react-router-dom";
 import AlreadyLoggedInNotice from "./AlreadyLoggedInNotice";
 
 export default function Signup() {
@@ -12,130 +12,129 @@ export default function Signup() {
     email: "",
     password: "",
   });
-
-  const navigate = useNavigate();
+  const [verificationCode, setVerificationCode] = useState("");
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(null);
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setForm((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  // 🧠 Reusable function to show error
+  const showError = (msg) => {
+    setErrorMsg(msg);
+    setTimeout(() => setErrorMsg(null), 3000);
   };
 
+  // 🧠 Reusable function to show success
+  const showSuccess = (msg) => {
+    setSuccessMsg(msg);
+    setTimeout(() => setSuccessMsg(null), 3000);
+  };
+
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  // ✅ Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/users/create", form);
+      const res = await axios.post("/api/users/create", form);
 
-      setSuccessMsg("🎉 User created successfully!");
-      setErrorMsg(null);
-      setForm({
-        fullname: "",
-        username: "",
-        email: "",
-        password: "",
+      // Send email code
+      await axios.post("/api/email/send-code", {
+        email: res.data.data.email,
+        username: res.data.data.username,
       });
-    } catch (error) {
-      if (error.response) {
-        setErrorMsg(error.response.data.message || "❌ Signup failed");
-        setSuccessMsg(null);
-      } else {
-        setErrorMsg("Something went wrong");
-        setSuccessMsg(null);
-      }
+
+      showSuccess("🎉 Signup successful. Code sent to email.");
+      setShowVerifyModal(true);
+    } catch (err) {
+      
+      showError(err?.response?.data?.message || "❌ Signup failed");
     }
   };
 
-  // Auto-clear messages after 4 seconds
-  useEffect(() => {
-    if (errorMsg || successMsg) {
-      if (successMsg) {
-        setTimeout(() => {
-          navigate("/signin");
-        }, 2000);
+  // 🔐 Handle code verification
+  const handleVerify = async () => {
+    try {
+      const res = await axios.post("/api/email/verify-code", {
+        email: form.email,
+        username: form.username,
+        code: verificationCode,
+      });
+
+      if (res.status === 200) {
+        showSuccess("✅ Email verified!");
+        setTimeout(() => navigate("/signin"), 2000);
+      } else {
+        showError("❌ Invalid code. Try again.");
       }
-      const timer = setTimeout(() => {
-        setErrorMsg(null);
-        setSuccessMsg(null);
-      }, 2000);
-      return () => clearTimeout(timer);
+    } catch {
+      showError("❌ Verification failed");
     }
-  }, [errorMsg, successMsg]);
+  };
 
-  // null = checking, true/false = result
+  // 🔁 Handle resend code
+  const handleResendCode = async () => {
+    try {
+      await axios.post("/api/email/send-code", {
+        email: form.email,
+        username: form.username,
+      });
+      showSuccess("📧 Verification code resent.");
+    } catch {
+      showError("❌ Failed to resend code.");
+    }
+  };
 
+  // 🔒 Check if user already logged in
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get("/api/user/profile", {
-          withCredentials: true,
-        });
-        setIsLoggedIn(true); // user is logged in
+        await axios.get("/api/user/profile", { withCredentials: true });
+        setIsLoggedIn(true);
       } catch {
-        setIsLoggedIn(false); // user is not logged in
+        setIsLoggedIn(false);
       }
     })();
   }, []);
 
-  if (isLoggedIn === null) {
-    return <div className="text-white p-10">Checking...</div>;
-  }
-
-  if (isLoggedIn) {
-    return <AlreadyLoggedInNotice />;
-  }
+  if (isLoggedIn === null) return <div className="text-white">Checking...</div>;
+  if (isLoggedIn) return <AlreadyLoggedInNotice />;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] px-4">
-      <div className="bg-white/5 backdrop-blur-md border border-gray-700 shadow-2xl rounded-2xl p-8 w-full max-w-md text-gray-100 relative">
-        {/* 💬 Alerts */}
-        {errorMsg && (
-          <div className="absolute top-[-70px] left-0 w-full">
-            <div className="bg-red-600/20 border border-red-400 text-red-300 p-3 rounded-md text-center text-sm animate-pulse shadow">
-              ❌ {errorMsg}
-            </div>
-          </div>
-        )}
-        {successMsg && (
-          <div className="absolute top-[-70px] left-0 w-full">
-            <div className="bg-green-600/20 border border-green-400 text-green-300 p-3 rounded-md text-center text-sm animate-fadeIn shadow">
-              ✅ {successMsg}
-            </div>
-          </div>
-        )}
+      <div className="bg-white/5 p-8 rounded-xl w-full max-w-md text-white relative border border-gray-700 shadow-xl">
+        {errorMsg && <Alert message={errorMsg} type="error" />}
+        {successMsg && <Alert message={successMsg} type="success" />}
 
         <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-cyan-400 to-fuchsia-500 bg-clip-text text-transparent">
           Create Account
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <InputField
+          <Input
             label="Full Name"
             name="fullname"
             value={form.fullname}
             onChange={handleChange}
-            placeholder="Full name"
           />
-          <InputField
+          <Input
             label="Username"
             name="username"
             value={form.username}
             onChange={handleChange}
-            placeholder="Username"
           />
-          <InputField
+          <Input
             label="Email"
             name="email"
             value={form.email}
             onChange={handleChange}
-            placeholder="Email"
             type="email"
           />
 
-          {/* Password Field */}
+          {/* Password */}
           <div>
             <label className="block mb-1 text-sm">Password</label>
             <div className="relative">
@@ -145,48 +144,79 @@ export default function Signup() {
                 value={form.password}
                 onChange={handleChange}
                 required
-                placeholder="Password"
-                className="w-full px-4 py-2 pr-10 rounded-md bg-gray-800 border border-gray-600 focus:ring-2 focus:ring-fuchsia-500 outline-none"
+                className="w-full px-4 py-2 pr-10 rounded-md bg-gray-800 border border-gray-600"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                className="absolute top-1/2 right-3 transform -translate-y-1/2"
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
-            className="w-full py-2 rounded-md bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold hover:from-cyan-600 hover:to-fuchsia-600 transition"
+            className="w-full py-2 bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold rounded"
           >
             Sign Up
           </button>
         </form>
-
         <p className="text-center text-sm text-gray-400 mt-6">
-          Already have an account?{" "}
-          <a href="/signin" className="text-cyan-400 hover:underline">
-            Sign in
-          </a>
+          I have an account?{" "}
+          <Link to="/signin" className="text-cyan-400 hover:underline">
+            Sign In here
+          </Link>
         </p>
       </div>
+
+      {/* 📩 Email Verification Modal */}
+      {showVerifyModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-[#1e1e2f] p-6 rounded-lg w-full max-w-sm text-white border border-cyan-500 shadow-xl">
+            <h3 className="text-xl font-semibold mb-4 text-cyan-400">
+              Verify Your Email
+            </h3>
+            <p className="text-gray-300 text-sm mb-2">
+              We’ve sent a 6-digit code to <b>{form.email}</b>. Please enter it
+              below:
+            </p>
+            <input
+              type="text"
+              maxLength="6"
+              className="w-full p-2 mb-4 rounded bg-gray-800 border border-gray-600"
+              placeholder="Enter verification code"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+            />
+            <button
+              onClick={handleVerify}
+              className="w-full py-2 bg-green-500 hover:bg-green-600 rounded font-semibold"
+            >
+              Verify Code
+            </button>
+            <div className="flex justify-between gap-2 mt-4">
+              <button
+                onClick={handleResendCode}
+                className="w-1/2 py-2 bg-blue-500 hover:bg-blue-600 rounded font-semibold"
+              >
+                Resend Code
+              </button>
+              <button
+                onClick={() => setShowVerifyModal(false)}
+                className="w-1/2 py-2 bg-red-500 hover:bg-red-600 rounded font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-// 🔧 Reusable InputField Component
-function InputField({
-  label,
-  name,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-}) {
+function Input({ label, name, value, onChange, type = "text" }) {
   return (
     <div>
       <label className="block mb-1 text-sm">{label}</label>
@@ -196,9 +226,24 @@ function InputField({
         value={value}
         onChange={onChange}
         required
-        placeholder={placeholder}
-        className="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none"
+        className="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600"
       />
+    </div>
+  );
+}
+
+function Alert({ message, type }) {
+  return (
+    <div className="absolute top-[-70px] left-0 w-full z-50">
+      <div
+        className={`p-3 text-center rounded-md text-sm shadow-md ${
+          type === "error"
+            ? "bg-red-600/20 text-red-300 border border-red-400"
+            : "bg-green-600/20 text-green-300 border border-green-400"
+        }`}
+      >
+        {message}
+      </div>
     </div>
   );
 }

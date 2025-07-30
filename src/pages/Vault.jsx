@@ -68,7 +68,7 @@ export default function Vault() {
         console.error("❌ Error fetching passwords:", error.message);
       }
     })();
-  }, []);
+  }, [editData, deleteId]);
 
   const toggleVisibility = (id) => {
     setVisibleIds((prev) =>
@@ -93,6 +93,7 @@ export default function Vault() {
   };
 
   const confirmDelete = async () => {
+    
     try {
       await axios.delete(`/api/passwords/delete/${deleteId}`);
       setPasswords(passwords.filter((item) => item.id !== deleteId));
@@ -104,11 +105,11 @@ export default function Vault() {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+    
     try {
-      console.log(editData.id);
-      
+      const id = editData.id || editData._id
       await axios.put(
-        `/api/passwords/update-password/${editData.id}`,
+        `/api/passwords/update-password/${id}`,
         editData
       );
       setPasswords((prev) =>
@@ -377,4 +378,4 @@ export default function Vault() {
       )}
     </>
   );
-} 
+}
