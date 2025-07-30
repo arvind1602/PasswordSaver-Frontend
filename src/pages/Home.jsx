@@ -18,7 +18,7 @@ export default function Home() {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const res = await axios.post("/api/users/verify", null, {
+        const res = await axios.post("https://passwordsaver-backend.onrender.com/api/users/verify", null, {
           withCredentials: true,
         });
 

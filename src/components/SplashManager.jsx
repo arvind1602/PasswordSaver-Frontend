@@ -11,7 +11,7 @@ export default function SplashManager() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.post("/api/users/refresh-token", null, {
+        const res = await axios.post("https://passwordsaver-backend.onrender.com/api/users/refresh-token", null, {
           withCredentials: true,
         });
         // console.log("access token refres : " , res);

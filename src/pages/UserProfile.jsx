@@ -20,9 +20,12 @@ export default function UserProfile() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get("/api/user/profile", {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          "https://passwordsaver-backend.onrender.com/api/user/profile",
+          {
+            withCredentials: true,
+          }
+        );
         setUser(res.data.data);
       } catch (error) {
         console.error("❌ Failed to fetch user:", error.message);
@@ -32,14 +35,18 @@ export default function UserProfile() {
   }, []);
 
   const handleLogout = async () => {
-    await axios.post("/api/users/logout", {}, { withCredentials: true });
+    await axios.post(
+      "https://passwordsaver-backend.onrender.com/api/users/logout",
+      {},
+      { withCredentials: true }
+    );
     navigate("/signin");
   };
 
   const handleUsernameUpdate = async () => {
     try {
       await axios.put(
-        "/api/users/update-username",
+        "https://passwordsaver-backend.onrender.com/api/users/update-username",
         { username: newUsername },
         { withCredentials: true }
       );
@@ -56,9 +63,13 @@ export default function UserProfile() {
     }
 
     try {
-      await axios.put("/api/users/change-password", passwords, {
-        withCredentials: true,
-      });
+      await axios.put(
+        "https://passwordsaver-backend.onrender.com/api/users/change-password",
+        passwords,
+        {
+          withCredentials: true,
+        }
+      );
       alert("✅ Password updated successfully");
       setShowPasswordForm(false);
       setPasswords({ oldPassword: "", newPassword: "" });
@@ -70,9 +81,12 @@ export default function UserProfile() {
 
   const handleDeleteAccount = async () => {
     try {
-      await axios.delete("/api/users/delete-account", {
-        withCredentials: true,
-      });
+      await axios.delete(
+        "https://passwordsaver-backend.onrender.com/api/users/delete-account",
+        {
+          withCredentials: true,
+        }
+      );
       navigate("/signup");
     } catch (err) {
       alert("Failed to delete account");

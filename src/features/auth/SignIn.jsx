@@ -2,14 +2,14 @@ import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import { useEffect } from "react";
-import { useNavigate , Link} from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ username: "", password: "" });
   const [successMsg, setSuccessMsg] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -19,9 +19,13 @@ export default function SignIn() {
     e.preventDefault();
 
     try {
-      const response = await axios.post("/api/users/login", form, {
-        withCredentials: true,
-      });
+      const response = await axios.post(
+        "https://passwordsaver-backend.onrender.com/api/users/login",
+        form,
+        {
+          withCredentials: true,
+        }
+      );
 
       setSuccessMsg(response.data.message);
       // Handle login success (e.g., redirect, store user)
@@ -36,7 +40,7 @@ export default function SignIn() {
   useEffect(() => {
     if (successMsg) {
       const timer = setTimeout(() => setSuccessMsg(null), 2000);
-      navigate("/home")
+      navigate("/home");
 
       return () => clearTimeout(timer);
     }
@@ -156,7 +160,8 @@ export default function SignIn() {
           <p className="text-center text-sm text-gray-400 mt-6">
             Don’t have an account?{" "}
             <Link to="/signup" className="text-cyan-400 hover:underline">
-              Sign up here</Link>
+              Sign up here
+            </Link>
           </p>
         </div>
       </div>
