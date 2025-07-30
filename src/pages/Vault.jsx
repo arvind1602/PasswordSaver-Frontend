@@ -35,7 +35,7 @@ export default function Vault() {
       // console.log("hello");
 
       try {
-        const res = await axios.post("/api/users/verify", null, {
+        const res = await axios.post("https://passwordsaverbackend.onrender.com/api/users/verify", null, {
           withCredentials: true,
         });
 
@@ -62,7 +62,7 @@ export default function Vault() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get("/api/passwords/show/user-passwords");
+        const res = await axios.get("https://passwordsaverbackend.onrender.com/api/passwords/show/user-passwords");
         setPasswords(res.data.data);
       } catch (error) {
         console.error("❌ Error fetching passwords:", error.message);
@@ -95,7 +95,7 @@ export default function Vault() {
   const confirmDelete = async () => {
     
     try {
-      await axios.delete(`/api/passwords/delete/${deleteId}`);
+      await axios.delete(`https://passwordsaverbackend.onrender.com/api/passwords/delete/${deleteId}`);
       setPasswords(passwords.filter((item) => item.id !== deleteId));
       setShowDeleteModal(false);
     } catch (error) {
@@ -109,7 +109,7 @@ export default function Vault() {
     try {
       const id = editData.id || editData._id
       await axios.put(
-        `/api/passwords/update-password/${id}`,
+        `https://passwordsaverbackend.onrender.com/api/passwords/update-password/${id}`,
         editData
       );
       setPasswords((prev) =>
@@ -124,7 +124,7 @@ export default function Vault() {
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/passwords/add", newPasswordData);
+      const res = await axios.post("https://passwordsaverbackend.onrender.com/api/passwords/add", newPasswordData);
       setPasswords((prev) => [...prev, res.data.data]);
       setShowAddModal(false);
 

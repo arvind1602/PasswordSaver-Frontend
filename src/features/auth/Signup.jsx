@@ -39,10 +39,10 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/users/create", form);
+      const res = await axios.post("https://passwordsaverbackend.onrender.com/api/users/create", form);
 
       // Send email code
-      await axios.post("/api/email/send-code", {
+      await axios.post("https://passwordsaverbackend.onrender.com/api/email/send-code", {
         email: res.data.data.email,
         username: res.data.data.username,
       });
@@ -58,7 +58,7 @@ export default function Signup() {
   // 🔐 Handle code verification
   const handleVerify = async () => {
     try {
-      const res = await axios.post("/api/email/verify-code", {
+      const res = await axios.post("https://passwordsaverbackend.onrender.com/api/email/verify-code", {
         email: form.email,
         username: form.username,
         code: verificationCode,
@@ -78,7 +78,7 @@ export default function Signup() {
   // 🔁 Handle resend code
   const handleResendCode = async () => {
     try {
-      await axios.post("/api/email/send-code", {
+      await axios.post("https://passwordsaverbackend.onrender.com/api/email/send-code", {
         email: form.email,
         username: form.username,
       });
@@ -92,7 +92,7 @@ export default function Signup() {
   useEffect(() => {
     (async () => {
       try {
-        await axios.get("/api/user/profile", { withCredentials: true });
+        await axios.get("https://passwordsaverbackend.onrender.com/api/user/profile", { withCredentials: true });
         setIsLoggedIn(true);
       } catch {
         setIsLoggedIn(false);

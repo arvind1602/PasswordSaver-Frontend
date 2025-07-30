@@ -33,16 +33,7 @@ const tailwindInlineConfig = {
 
 export default defineConfig({
   plugins: [react()],
-  server: {
-    proxy: {
-      "/api": {
-        target: "https://passwordsaverbackend.onrender.com",
-        changeOrigin: true,
-        secure: false, // Set to true if your backend uses a valid HTTPS cert
-        rewrite: (path) => path.replace(/^\/api/, "/api"), // optional cleanup
-      },
-    },
-  },
+
   css: {
     postcss: {
       plugins: [tailwindPostcss(tailwindInlineConfig), autoprefixer()],

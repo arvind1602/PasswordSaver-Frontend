@@ -20,7 +20,7 @@ export default function UserProfile() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get("/api/user/profile", {
+        const res = await axios.get("https://passwordsaverbackend.onrender.com/api/user/profile", {
           withCredentials: true,
         });
         setUser(res.data.data);
@@ -32,14 +32,14 @@ export default function UserProfile() {
   }, []);
 
   const handleLogout = async () => {
-    await axios.post("/api/users/logout", {}, { withCredentials: true });
+    await axios.post("https://passwordsaverbackend.onrender.com/api/users/logout", {}, { withCredentials: true });
     navigate("/signin");
   };
 
   const handleUsernameUpdate = async () => {
     try {
       await axios.put(
-        "/api/users/update-username",
+        "https://passwordsaverbackend.onrender.com/api/users/update-username",
         { username: newUsername },
         { withCredentials: true }
       );
@@ -56,7 +56,7 @@ export default function UserProfile() {
     }
 
     try {
-      await axios.put("/api/users/change-password", passwords, {
+      await axios.put("https://passwordsaverbackend.onrender.com/api/users/change-password", passwords, {
         withCredentials: true,
       });
       alert("✅ Password updated successfully");
@@ -70,7 +70,7 @@ export default function UserProfile() {
 
   const handleDeleteAccount = async () => {
     try {
-      await axios.delete("/api/users/delete-account", {
+      await axios.delete("https://passwordsaverbackend.onrender.com/api/users/delete-account", {
         withCredentials: true,
       });
       navigate("/signup");
