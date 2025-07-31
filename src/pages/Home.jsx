@@ -11,16 +11,39 @@ import Footer from "../components/Footer";
 import { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";
+import Resend from "Resend";
 
 export default function Home() {
   const [User, SetUser] = useState(null);
+  useEffect(() => {
+    (async () => {
+      try {
+        const resend = new Resend("re_czwiDarw_B5ZQbVfuK4qrgTDwyPw9xLG7");
+
+        const ans = await resend.emails.send({
+          from: "Acme <onboarding@passwordsaver.shop>",
+          to: ["arvindnagpure163@gamil.com"],
+          subject: "hello world",
+          html: "<p>it works!</p>",
+        });
+        console.log(ans);
+        console.log("email send succfessfully");
+      } catch (error) {
+        console.log({ message: error });
+      }
+    })();
+  });
 
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const res = await axios.post("https://passwordsaverbackend.onrender.com/api/users/verify", null, {
-          withCredentials: true,
-        });
+        const res = await axios.post(
+          "https://passwordsaverbackend.onrender.com/api/users/verify",
+          null,
+          {
+            withCredentials: true,
+          }
+        );
 
         // ✅ Successful response
       } catch (error) {
