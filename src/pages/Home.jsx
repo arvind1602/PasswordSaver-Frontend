@@ -32,7 +32,7 @@ export default function Home() {
         console.log({ message: error });
       }
     })();
-  });
+  },[]);
 
   useEffect(() => {
     const verifyUser = async () => {
